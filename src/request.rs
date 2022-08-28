@@ -1,4 +1,4 @@
-use crossbeam_channel::Sender;
+use crossbeam_channel::{Receiver, Sender};
 
 pub type Result<R> = std::result::Result<<R as Request>::Output, <R as Request>::Error>;
 
@@ -21,18 +21,9 @@ pub trait ResolveRequest<R: Request> {
     fn resolve_request(&mut self, req: R) -> crate::Result<R>;
 }
 
-// impl<R, T> ResolveRequest<R> for T
-// where
-//     R: Request,
-//     T: Resolve<R>,
-// {
-//     fn resolve_request(&mut self, req: &mut R) -> crate::Result<R> {
-//         match self.resolve(req) {
-//             Ok(res) => Ok(res),
-//             Err(e) => Err(crate::Error::Resolve(e)),
-//         }
-//     }
-// }
+pub trait Wrappable<T>: Request + 'static {
+    fn into_wrapped_pair(self) -> (T, Receiver<crate::Result<Self>>);
+}
 
 /// A message for an actor
 #[derive(Debug)]

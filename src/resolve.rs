@@ -1,5 +1,5 @@
 use crate::{
-    request::{Request, ResolveRequest, Wrapper},
+    request::{Request, ResolveRequest, Wrappable, Wrapper},
     Error, Result,
 };
 use crossbeam_channel::{Receiver, Sender};
@@ -23,9 +23,9 @@ impl<T> Agent<T> {
     /// Send a request to the Actor for it to resolve and return the result
     pub fn send<R>(&self, req: R) -> Result<R>
     where
-        R: Request + Into<(T, Receiver<Result<R>>)> + 'static,
+        R: Wrappable<T>,
     {
-        let (wrapped, rx) = req.into();
+        let (wrapped, rx) = req.into_wrapped_pair();
         self.send_inner::<R>(wrapped, rx)
     }
 
@@ -55,9 +55,9 @@ impl<T> Agent<T> {
 
 impl<R, T> ResolveRequest<R> for Agent<T>
 where
-    R: Request + Into<(T, Receiver<Result<R>>)> + 'static,
+    R: Wrappable<T>,
 {
-    fn resolve_request(&mut self, req: R) -> crate::Result<R> {
+    fn resolve_request(&mut self, req: R) -> Result<R> {
         self.send(req)
     }
 }
@@ -66,9 +66,9 @@ pub trait Handle<U> {
     /// Send a request to the Actor for it to resolve and return the result
     fn handle<R>(&self, req: R) -> Result<R>
     where
-        R: Request + Into<(U, Receiver<Result<R>>)> + 'static,
+        R: Wrappable<U>,
     {
-        let (wrapped, rx) = req.into();
+        let (wrapped, rx) = req.into_wrapped_pair();
         self.map_and_resolve::<R>(wrapped, rx)
     }
 

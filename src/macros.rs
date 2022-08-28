@@ -72,11 +72,11 @@ macro_rules! request_set {
         }
 
         $(
-            impl From<$req> for ($enum, crossbeam_channel::Receiver<Result<$req>>) {
-                fn from(req: $req) -> ($enum, crossbeam_channel::Receiver<Result<$req>>) {
+            impl crate::Wrappable<$enum> for $req {
+                fn into_wrapped_pair(self) -> ($enum, crossbeam_channel::Receiver<crate::Result<Self>>) {
                     let (tx, rx) = crossbeam_channel::bounded(1);
 
-                    ($enum::$req($crate::Message { req, tx }), rx)
+                    ($enum::$req($crate::Message { req: self, tx }), rx)
                 }
             }
 

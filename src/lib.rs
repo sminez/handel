@@ -6,7 +6,7 @@ mod macros;
 pub mod request;
 pub mod resolve;
 
-pub use request::{Message, Request, Resolve, ResolveRequest, Wrapper};
+pub use request::{Message, Request, Resolve, ResolveRequest, Wrappable, Wrapper};
 pub use resolve::{Agent, Handle};
 
 /// An error encountered while interacting with an Actor
